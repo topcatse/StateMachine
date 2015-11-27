@@ -103,7 +103,7 @@ State StateMachine_topState(StateMachine self, Signal const* e)
 }
 
 /// Shall be called when an event has been accepted.
-State StateMachine_handled(StateMachine self, Signal const* e = 0)
+State StateMachine_handled(StateMachine self, Signal const* e)
 {
 	static const State us = StateMachine_handled;
 	return us;
@@ -280,26 +280,28 @@ int StateMachine_dispatch(StateMachine self, Signal e)
    // Side-effect: Call to findPitcher() above, which possibly,
    // sets a new target. If target is unchanged it is considered as an 
    // internal transition so step out. 
-   if ( target() == owner_->topState() )
+   if (StateMachine_target(self) == StateMachine_topState)
    {
        SM_TRACE( "StateMachine handled case (h)" );
        return true;
    }
 
-   exitDownToPitcher();
+   StateMachine_exitDownToPitcher(self);
 
    // (a) Handle transition to self.
-   if ( pitcher() == target() )
+   if (StateMachine_pitcher(self) == StateMachine_target(self) )
    {
       SM_TRACE( "StateMachine handled case (a)" );
-      pitcher()( &exitEvent_ );      
-      target()( &entryEvent_ );
-      init( target() );
+	  State_invoke(StateMachine_pitcher(self), EXIT);
+	  State_invoke(StateMachine_target(self), ENTRY);
+	  StateMachine_init(self, StateMachine_target(self) );
       return true;
    }   
+#define INVOKE(state, event) State_invoke(StateMachine_##state(self), event)
+#define PITCHER() StateMachine_pitcher(self)
 
    // (b) Handle pitcher == targets' parent.
-   State< OWNER, T > targetParent  = target()( &inquireEvent_ );
+   State targetParent = INtarget(self), INQUIRE);
    if ( pitcher() == targetParent )
    {
       SM_TRACE( "StateMachine handled case (b)" );

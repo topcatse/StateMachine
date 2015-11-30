@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
-#include "Deque.h"
+#include "deque.h"
 #ifndef DEQUE_STATIC
 #include <malloc.h>
 #endif /* DEQUE_STATIC */
@@ -75,7 +75,7 @@ deque_init(Deque d, deque_comparater_t compare_func) {
 static struct deque_node_t *
 deque_alloc_node(Deque d) {
 	struct deque_node_t * node;
-	int i = 0;
+	int i;
 	/* find the first unused node */
 	while ((node = &d->nodes[i++])->in_use);
 	if (node != NULL)

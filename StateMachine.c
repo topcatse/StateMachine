@@ -9,6 +9,7 @@
 
 #include "StateMachineC.h"
 #include <assert.h>
+#include <corecrt_malloc.h>
 
 void State_ctor( State* self, StateFcn stateFcn )
 {
@@ -163,10 +164,10 @@ const StateMachine< OWNER, T >::exitEvent_    = SmEvent< T >( EXIT );
 #endif
 //------------------------------------------------------------------------------
 
-void StateMachine_open(StateMachine    self,
-					   OWNER*          owner,
-					   State const*    initial,
-					   Signal const*   e)
+int StateMachine_open(StateMachine    self,
+					  OWNER*          owner,
+					  State const*    initial,
+					  Signal const*   e)
 {
    SM_TRACE( "StateMachine open" );
 
@@ -174,6 +175,14 @@ void StateMachine_open(StateMachine    self,
    self->pitcher_ = StateMachine_topState(self, DUMMY);
    self->current_ = StateMachine_topState(self, DUMMY);
    self->target_  = initial;
+   self->trace_   = malloc(sizeof(struct deque_t));
+
+   if (dself->trace_ != NULL) {
+	   deque_init(d, compare_func);
+   }
+
+   self->trace_   = 
+   deque_init(&trace, NULL);
    
    State target = StateMachine_target(self);
    State_invoke(&target, ENTRY);
@@ -299,25 +308,26 @@ int StateMachine_dispatch(StateMachine self, Signal e)
    }   
 #define INVOKE(state, event) State_invoke(StateMachine_##state(self), event)
 #define PITCHER() StateMachine_pitcher(self)
+#define TARGET() StateMachine_target(self)
 
    // (b) Handle pitcher == targets' parent.
-   State targetParent = INtarget(self), INQUIRE);
-   if ( pitcher() == targetParent )
+   State targetParent = INVOKE(target, INQUIRE);
+   if (PITCHER() == targetParent )
    {
       SM_TRACE( "StateMachine handled case (b)" );
-      target()( &entryEvent_ );
-      init( target() );
+	  INVOKE(target, ENTRY);
+	  StateMachine_init(self, TARGET());
       return true;
    }
    
    // (c) Handle pitcher's parent == targets' parent.
-   State< OWNER, T > pitcherParent = pitcher()( &inquireEvent_ );
+   State pitcherParent = INVOKE(pitcher, INQUIRE);
    if ( pitcherParent == targetParent )
    {
       SM_TRACE( "StateMachine handled case (c)" );
-      pitcher()( &exitEvent_ );      
-      target()( &entryEvent_ );
-      init( target() );
+	  INVOKE(pitcher, EXIT);
+	  INVOKE(target, ENTRY);
+	  StateMachine_init(self, TARGET());
       return true;
    }
 
@@ -325,13 +335,13 @@ int StateMachine_dispatch(StateMachine self, Signal e)
    if ( pitcherParent == target() )
    {
       SM_TRACE( "StateMachine handled case (d)" );
-      pitcher()( &exitEvent_ );      
-      init( target() );
+	  INVOKE(pitcher, EXIT);
+	  StateMachine_init(self, TARGET());
       return true;
    }
 
    // The target stateFcn hierarchy needs to be recorded. 
-   Path  trace;
+   deque_init(&trace, NULL);
    trace.push_front( target() );
    trace.push_front( targetParent );
 

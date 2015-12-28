@@ -33,48 +33,50 @@
 //==============================================================================
 
 typedef unsigned short Signal;
-typedef void           OWNER;
+typedef void*          OWNER;
 struct State;
 
 //==============================================================================
 
 /// User shall start numbering his signals with USER_START.
-typedef enum { USER_START = 3 } StartSignal;
+typedef enum { SM_USER_START = 3 } StartSignal;
  
-typedef struct State (*StateFcn)(OWNER*, Signal const*);
+typedef struct State* (*StateFcn)(OWNER, Signal);
 
-typedef struct State
+struct State
 { 
 	StateFcn stateFcn_;
-    OWNER*   owner_; // Cached, not owned
-} State;
+    OWNER    owner_; // Cached, not owned
+};
+
+typedef struct State* State;
 
 /// Constructor
-void State_ctor( State* self, StateFcn stateFcn );
+void State_ctor( State self, StateFcn stateFcn );
 
 /// Initializer. Object takes ownership of load.
-void State_init( State* self, OWNER* owner, StateFcn stateFcn );
+void State_init( State self, OWNER owner, StateFcn stateFcn );
 	
 /// Copy constructor	
-void State_copyCtor( State* self, State const* other );	
+void State_copyCtor( State self, State const other );
 
 /// Utility swap method.
-void State_swap( State* self, State* other );
+void State_swap( State self, State other );
 	
 /// Assignment operator.
-State* State_assign( State* self, State const* other );
+State* State_assign( State self, State const other );
 
 /// Conversion operator to StateFcn.
-StateFcn State_stateFcn( State* self );
+StateFcn State_stateFcn( State self );
 
 /// Equality operator.
-int State_isEqual( State* self, State const* rhs );
+int State_isEqual( State self, State const rhs );
 
 /// Inequality operator.
-int State_isNotEqual( State* self, State const* rhs );
+int State_isNotEqual( State self, State const rhs );
 
 /// Invoke transition in owner.
-State State_invoke( State* self, Signal const* e );
+State State_invoke( State self, Signal const e );
 
 //==============================================================================
 
@@ -84,10 +86,10 @@ State State_invoke( State* self, Signal const* e );
 struct StateMachine_t
 {
      /// Helper events used by dispatch().
-    static Signal const inquireEvent_;
-    static Signal const initEvent_;
-    static Signal const entryEvent_;
-    static Signal const exitEvent_;
+    //static Signal const inquireEvent_;
+    //static Signal const initEvent_;
+    //static Signal const entryEvent_;
+    //static Signal const exitEvent_;
 
     /// The current stateFcn.
     State current_;
@@ -104,23 +106,23 @@ struct StateMachine_t
 	Deque trace_;
 };
 
-typedef StateMachine_t* StateMachine;
+typedef struct StateMachine_t* StateMachine;
 
 /// Use to specify predefined stateFcn actions when a stateFcn is initialized, 
 /// is entered or leaves a stateFcn. INQUIRE is reserved for internal use.
-enum StandardSignals { DUMMY = -2, INQUIRE = -1, INIT, ENTRY, EXIT };
+enum StandardSignals { SM_DUMMY = -2, SM_INQUIRE = -1, SM_INIT, SM_ENTRY, SM_EXIT };
 
 /// Initialize and execute initial transition.
-void StateMachine_open(StateMachine    self,
-					   OWNER*          owner,
-					   State const* initial,
-					   Signal const*   e);
+void StateMachine_open(StateMachine self,
+					   OWNER        owner,
+					   State const  initial,
+					   Signal       e);
 
 /// Check if user is in given stateFcn.
 /// 2 if user is in given stateFcn,
 /// 1 if in sub stateFcn,
 /// 0 otherwise.
-int StateMachine_isInState(StateMachine self, State const* stateFcn);
+int StateMachine_isInState(StateMachine self, State const stateFcn);
 
 /// Current stateFcn accessor.
 State StateMachine_current(StateMachine self);
@@ -129,24 +131,16 @@ State StateMachine_current(StateMachine self);
 int StateMachine_dispatch(StateMachine self, Signal e);
 
 /// Call when there is a default initialization stateFcn.
-void StateMachine_initializer(StateMachine self, State const* s);
+void StateMachine_initializer(StateMachine self, State const s);
 
 /// Call when a transition shall occur.
-void StateMachine_transition(StateMachine self, State const* s);
+void StateMachine_transition(StateMachine self, State const s);
 
 /// To be returned when there is no parent stateFcn.
-State StateMachine_topState(StateMachine self, Signal const* e = 0)
-{
-	static const State us = StateMachine_topState;
-	return us;
-}
+State StateMachine_topState(StateMachine self, Signal const e);
 
 /// Shall be called when an event has been accepted.
-State StateMachine_handled(StateMachine self, Signal const* e = 0)
-{
-	static const State us = StateMachine_handled;
-	return us;
-}
+State StateMachine_handled(StateMachine self, Signal const e);
 
 //==============================================================================
 #endif /* BASE_STATE_MACHINE_H_ */

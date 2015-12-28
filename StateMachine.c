@@ -9,9 +9,9 @@
 
 #include "StateMachineC.h"
 #include <assert.h>
-#include <corecrt_malloc.h>
+#include <malloc.h>
 
-void State_ctor( State* self, StateFcn stateFcn )
+void State_ctor( State self, StateFcn stateFcn )
 {
 	self->owner_ = 0;
 	self->stateFcn_ = stateFcn;		
@@ -22,20 +22,20 @@ void State_dtor( State* self )
 }
 
 /// Initializer. Object takes ownership of load.
-void State_init( State* self, OWNER* owner, StateFcn stateFcn ) 
+void State_init( State self, OWNER owner, StateFcn stateFcn )
 {
 	self->owner_ = owner;
 	self->stateFcn_ = stateFcn;
 }
 	
-void State_copyCtor( State* self, State const* other )
+void State_copyCtor( State self, State const other )
 {
 	self->owner_ = other->owner_;
 	self->stateFcn_ = other->stateFcn_;		
 }		
 
 /// Utility swap method.
-void State_swap( State* self, State* other )
+void State_swap( State self, State other )
 {
 	OWNER* tmp1 = self->owner_;
 	self->owner_  = other->owner_;
@@ -47,34 +47,34 @@ void State_swap( State* self, State* other )
 }
 	
 /// Assignment operator.
-State* State_assign( State* self, State const* other )
-{
-	State tmp;
-	State_copyCtor( &tmp, other );
-	State_swap( self, &tmp );
-	return self;
-}
+//State State_assign( State self, State const other )
+//{
+//	State tmp;
+//	State_copyCtor( &tmp, other );
+//	State_swap( self, &tmp );
+//	return self;
+//}
 
 /// Conversion operator to StateFcn.
-StateFcn State_stateFcn( State* self )
+StateFcn State_stateFcn( State self )
 {
 	return self->stateFcn_;
 }
 
 /// Equality operator.
-int State_isEqual( State* self, State const* rhs )
+int State_isEqual( State self, State const rhs )
 {
 	return self->stateFcn_ == rhs->stateFcn_;
 }
 
 /// Inequality operator.
-int State_isNotEqual( State* self, State const* rhs )
+int State_isNotEqual( State self, State const rhs )
 {
 	return self->stateFcn_ != rhs->stateFcn_;
 }
 
 /// Invoke transition in owner.
-State State_invoke( State* self, Signal const* e )
+State State_invoke( State self, Signal const e )
 {
 	return self->stateFcn_( self->owner_, e );
 }
@@ -85,33 +85,31 @@ State State_invoke( State* self, Signal const* e )
 int StateMachine_dispatch(StateMachine self, Signal e);
 
 /// Call when there is a default initialization stateFcn.
-void StateMachine_initializer(StateMachine self, State const* s)
+void StateMachine_initializer(StateMachine self, State const s)
 {
 	StateMachine_current(self, s);
 }
 
 /// Call when a transition shall occur.
-void StateMachine_transition(StateMachine self, State const* s)
+void StateMachine_transition(StateMachine self, State const s)
 {
 	StateMachine_target(self, s);
 }
 
 /// To be returned when there is no parent stateFcn.
-State StateMachine_topState(StateMachine self, Signal const* e)
+State StateMachine_topState(StateMachine self, Signal const e)
 {
-	static const State us = StateMachine_topState;
-	return us;
+	return 0;
 }
 
 /// Shall be called when an event has been accepted.
-State StateMachine_handled(StateMachine self, Signal const* e)
+State StateMachine_handled(StateMachine self, Signal const e)
 {
-	static const State us = StateMachine_handled;
-	return us;
+	return 0;
 }
 
 /// Current stateFcn mutator.
-static void StateMachine_current(StateMachine self, State const* current);
+static void StateMachine_current(StateMachine self, State const current);
 
 /// Pitcher stateFcn accessor.
 static State StateMachine_pitcher(StateMachine self);
@@ -120,10 +118,10 @@ static State StateMachine_pitcher(StateMachine self);
 static State StateMachine_target(StateMachine self);
 
 /// Pitcher stateFcn mutator.
-static void StateMachine_pitcher(StateMachine self, State const* pitcher);
+static void StateMachine_pitcher(StateMachine self, State const pitcher);
 
 /// Target stateFcn mutator.
-static void StateMachine_target(StateMachine self, State const* target);
+static void StateMachine_target(StateMachine self, State const target);
 
 /// Invoke init event in given stateFcn and init/entry events in all
 /// possibly subsequent states. 
@@ -228,7 +226,7 @@ State StateMachine_current(StateMachine self)
 
 //------------------------------------------------------------------------------
 
-static void StateMachine_current(StateMachine self, State const* current)
+static void StateMachine_current(StateMachine self, State const current)
 {
    SM_TRACE( "StateMachine current( StateFcn current )" );
    self->current_ = current;
@@ -244,7 +242,7 @@ static State StateMachine_pitcher(StateMachine self)
 
 //------------------------------------------------------------------------------
 
-static void StateMachine_pitcher(StateMachine self, State const* pitcher)
+static void StateMachine_pitcher(StateMachine self, State const pitcher)
 {
    SM_TRACE( "StateMachine pitcher( StateFcn pitcher )" );
    self->pitcher_ = pitcher;
@@ -252,7 +250,7 @@ static void StateMachine_pitcher(StateMachine self, State const* pitcher)
 
 //------------------------------------------------------------------------------
 
-static void StateMachine_target(StateMachine self, State const* target)
+static void StateMachine_target(StateMachine self, State const target)
 {
    SM_TRACE( "StateMachine target( StateFcn stateFcn )" );
    self->target_ = target;

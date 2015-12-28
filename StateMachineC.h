@@ -100,8 +100,6 @@ struct StateMachine_t
 
     /// The stateFcn machine owner.
     OWNER* owner_;
-
-	Deque trace_;
 };
 
 typedef StateMachine_t* StateMachine;

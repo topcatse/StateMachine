@@ -142,7 +142,7 @@ static void StateMachine_exitDownToPitcher(StateMachine self, );
 /// path: all states between pitcher and target..
 /// path: the states in the path might be updated but
 /// not the path itself.
-static void StateMachine_retraceEntryPath(StateMachine self, Deque* path);
+static void StateMachine_retraceEntryPath(StateMachine self, Deque path);
 
 
 #if CART
@@ -175,14 +175,6 @@ int StateMachine_open(StateMachine    self,
    self->pitcher_ = StateMachine_topState(self, DUMMY);
    self->current_ = StateMachine_topState(self, DUMMY);
    self->target_  = initial;
-   self->trace_   = malloc(sizeof(struct deque_t));
-
-   if (dself->trace_ != NULL) {
-	   deque_init(d, compare_func);
-   }
-
-   self->trace_   = 
-   deque_init(&trace, NULL);
    
    State target = StateMachine_target(self);
    State_invoke(&target, ENTRY);
@@ -340,29 +332,32 @@ int StateMachine_dispatch(StateMachine self, Signal e)
       return true;
    }
 
-   // The target stateFcn hierarchy needs to be recorded. 
-   deque_init(&trace, NULL);
-   trace.push_front( target() );
-   trace.push_front( targetParent );
+   // The target stateFcn hierarchy needs to be recorded.
+   struct deque_t trace_instance;
+   Deque trace = &trace_instance;
+   deque_init(trace, NULL);
+
+   deque_append(trace, TARGET());
+   deque_append(trace, targetParent);
 
    // (e) Handle pitcher == target's parent parent ... hierarchy.
-   State< OWNER, T > next( targetParent( &inquireEvent_ ) );
-   while ( next != owner_->topState() )
+   State next = State_invoke(targetParent, INQUIRE);
+   while ( next != StateMachine_topState)
    {
-      if ( next == pitcher() )
+      if ( next == PITCHER() )
       {
          SM_TRACE( "StateMachine handled case (e)" );
-         retraceEntryPath( trace );
-         init( target() );
+		 StateMachine_retraceEntryPath(self, trace);
+		 StateMachine_init(self, TARGET());
          return true;
       }
-      trace.push_front( next );
-      next = next( &inquireEvent_ );
+	  deque_append(trace, next);
+	  next = State_invoke(next, INQUIRE);
    }
-   trace.push_front( owner_->topState() );
+   deque_append(trace, StateMachine_topState);
 
    // The remaining cases impose EXIT of pitcher.
-   pitcher()( &exitEvent_ );
+   INVOKE(pitcher, EXIT);
 
    // (f) Handle pitcher's parent == target's parent parent ... hierarchy.
    typename Path::iterator pos;

@@ -64,7 +64,7 @@ void State_copyCtor( State self, State const other );
 void State_swap( State self, State other );
 	
 /// Assignment operator.
-State* State_assign( State self, State const other );
+//State* State_assign( State self, State const other );
 
 /// Conversion operator to StateFcn.
 StateFcn State_stateFcn( State self );
@@ -85,12 +85,6 @@ State State_invoke( State self, Signal const e );
  */
 struct StateMachine_t
 {
-     /// Helper events used by dispatch().
-    //static Signal const inquireEvent_;
-    //static Signal const initEvent_;
-    //static Signal const entryEvent_;
-    //static Signal const exitEvent_;
-
     /// The current stateFcn.
     State current_;
 
@@ -101,7 +95,7 @@ struct StateMachine_t
     State target_;
 
     /// The stateFcn machine owner.
-    OWNER* owner_;
+    OWNER owner_;
 };
 
 typedef struct StateMachine_t* StateMachine;
@@ -135,10 +129,10 @@ void StateMachine_initializer(StateMachine self, State const s);
 void StateMachine_transition(StateMachine self, State const s);
 
 /// To be returned when there is no parent stateFcn.
-State StateMachine_topState(StateMachine self, Signal const e);
+State StateMachine_topState(OWNER owner, Signal e);
 
 /// Shall be called when an event has been accepted.
-State StateMachine_handled(StateMachine self, Signal const e);
+State StateMachine_handled(OWNER owner, Signal e);
 
 //==============================================================================
 #endif /* BASE_STATE_MACHINE_H_ */

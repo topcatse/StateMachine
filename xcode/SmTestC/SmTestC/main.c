@@ -1,8 +1,8 @@
 //
 //  main.c
-//  SmCImp
+//  SmTestC
 //
-//  Created by Tommy Carlsson on 12/12/15.
+//  Created by Tommy Carlsson on 29/12/15.
 //  Copyright (c) 2015 Tommy Karlsson. All rights reserved.
 //
 

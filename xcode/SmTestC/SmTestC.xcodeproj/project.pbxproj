@@ -7,13 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		651B38081C1CA74D00D04665 /* Main.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B38071C1CA74D00D04665 /* Main.c */; };
-		651B38121C1CA80900D04665 /* Deque.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B380E1C1CA80900D04665 /* Deque.c */; };
-		651B38131C1CA80900D04665 /* StateMachine.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B38101C1CA80900D04665 /* StateMachine.c */; };
+		651B382D1C32ABB200D04665 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B382C1C32ABB200D04665 /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		651B38021C1CA74D00D04665 /* CopyFiles */ = {
+		651B38271C32ABB200D04665 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -25,16 +23,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		651B38041C1CA74D00D04665 /* SmCImp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SmCImp; sourceTree = BUILT_PRODUCTS_DIR; };
-		651B38071C1CA74D00D04665 /* Main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Main.c; sourceTree = "<group>"; };
-		651B380E1C1CA80900D04665 /* Deque.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Deque.c; path = ../../Deque.c; sourceTree = "<group>"; };
-		651B380F1C1CA80900D04665 /* Deque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Deque.h; path = ../../Deque.h; sourceTree = "<group>"; };
-		651B38101C1CA80900D04665 /* StateMachine.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = StateMachine.c; path = ../../StateMachine.c; sourceTree = "<group>"; };
-		651B38111C1CA80900D04665 /* StateMachineC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachineC.h; path = ../../StateMachineC.h; sourceTree = "<group>"; };
+		651B38291C32ABB200D04665 /* SmTestC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SmTestC; sourceTree = BUILT_PRODUCTS_DIR; };
+		651B382C1C32ABB200D04665 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		651B38011C1CA74D00D04665 /* Frameworks */ = {
+		651B38261C32ABB200D04665 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -44,100 +38,94 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		651B37FB1C1CA74C00D04665 = {
+		651B38201C32ABB200D04665 = {
 			isa = PBXGroup;
 			children = (
-				651B380E1C1CA80900D04665 /* Deque.c */,
-				651B380F1C1CA80900D04665 /* Deque.h */,
-				651B38101C1CA80900D04665 /* StateMachine.c */,
-				651B38111C1CA80900D04665 /* StateMachineC.h */,
-				651B38061C1CA74D00D04665 /* SmCImp */,
-				651B38051C1CA74D00D04665 /* Products */,
+				651B382B1C32ABB200D04665 /* SmTestC */,
+				651B382A1C32ABB200D04665 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		651B38051C1CA74D00D04665 /* Products */ = {
+		651B382A1C32ABB200D04665 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				651B38041C1CA74D00D04665 /* SmCImp */,
+				651B38291C32ABB200D04665 /* SmTestC */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		651B38061C1CA74D00D04665 /* SmCImp */ = {
+		651B382B1C32ABB200D04665 /* SmTestC */ = {
 			isa = PBXGroup;
 			children = (
-				651B38071C1CA74D00D04665 /* Main.c */,
+				651B382C1C32ABB200D04665 /* main.c */,
 			);
-			path = SmCImp;
+			path = SmTestC;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		651B38031C1CA74D00D04665 /* SmCImp */ = {
+		651B38281C32ABB200D04665 /* SmTestC */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 651B380B1C1CA74D00D04665 /* Build configuration list for PBXNativeTarget "SmCImp" */;
+			buildConfigurationList = 651B38301C32ABB200D04665 /* Build configuration list for PBXNativeTarget "SmTestC" */;
 			buildPhases = (
-				651B38001C1CA74D00D04665 /* Sources */,
-				651B38011C1CA74D00D04665 /* Frameworks */,
-				651B38021C1CA74D00D04665 /* CopyFiles */,
+				651B38251C32ABB200D04665 /* Sources */,
+				651B38261C32ABB200D04665 /* Frameworks */,
+				651B38271C32ABB200D04665 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = SmCImp;
-			productName = SmCImp;
-			productReference = 651B38041C1CA74D00D04665 /* SmCImp */;
+			name = SmTestC;
+			productName = SmTestC;
+			productReference = 651B38291C32ABB200D04665 /* SmTestC */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		651B37FC1C1CA74C00D04665 /* Project object */ = {
+		651B38211C32ABB200D04665 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0600;
 				ORGANIZATIONNAME = "Tommy Karlsson";
 				TargetAttributes = {
-					651B38031C1CA74D00D04665 = {
+					651B38281C32ABB200D04665 = {
 						CreatedOnToolsVersion = 6.0;
 					};
 				};
 			};
-			buildConfigurationList = 651B37FF1C1CA74D00D04665 /* Build configuration list for PBXProject "SmCImp" */;
+			buildConfigurationList = 651B38241C32ABB200D04665 /* Build configuration list for PBXProject "SmTestC" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 651B37FB1C1CA74C00D04665;
-			productRefGroup = 651B38051C1CA74D00D04665 /* Products */;
+			mainGroup = 651B38201C32ABB200D04665;
+			productRefGroup = 651B382A1C32ABB200D04665 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				651B38031C1CA74D00D04665 /* SmCImp */,
+				651B38281C32ABB200D04665 /* SmTestC */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		651B38001C1CA74D00D04665 /* Sources */ = {
+		651B38251C32ABB200D04665 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				651B38131C1CA80900D04665 /* StateMachine.c in Sources */,
-				651B38121C1CA80900D04665 /* Deque.c in Sources */,
-				651B38081C1CA74D00D04665 /* Main.c in Sources */,
+				651B382D1C32ABB200D04665 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		651B38091C1CA74D00D04665 /* Debug */ = {
+		651B382E1C32ABB200D04665 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -177,7 +165,7 @@
 			};
 			name = Debug;
 		};
-		651B380A1C1CA74D00D04665 /* Release */ = {
+		651B382F1C32ABB200D04665 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -211,14 +199,14 @@
 			};
 			name = Release;
 		};
-		651B380C1C1CA74D00D04665 /* Debug */ = {
+		651B38311C32ABB200D04665 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		651B380D1C1CA74D00D04665 /* Release */ = {
+		651B38321C32ABB200D04665 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -228,25 +216,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		651B37FF1C1CA74D00D04665 /* Build configuration list for PBXProject "SmCImp" */ = {
+		651B38241C32ABB200D04665 /* Build configuration list for PBXProject "SmTestC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				651B38091C1CA74D00D04665 /* Debug */,
-				651B380A1C1CA74D00D04665 /* Release */,
+				651B382E1C32ABB200D04665 /* Debug */,
+				651B382F1C32ABB200D04665 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		651B380B1C1CA74D00D04665 /* Build configuration list for PBXNativeTarget "SmCImp" */ = {
+		651B38301C32ABB200D04665 /* Build configuration list for PBXNativeTarget "SmTestC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				651B380C1C1CA74D00D04665 /* Debug */,
-				651B380D1C1CA74D00D04665 /* Release */,
+				651B38311C32ABB200D04665 /* Debug */,
+				651B38321C32ABB200D04665 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 651B37FC1C1CA74C00D04665 /* Project object */;
+	rootObject = 651B38211C32ABB200D04665 /* Project object */;
 }

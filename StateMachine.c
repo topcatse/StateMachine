@@ -9,16 +9,18 @@
 
 #include "StateMachineC.h"
 #include <assert.h>
-#include <malloc.h>
+#include <stdlib.h>
 
-void State_ctor( State self, StateFcn stateFcn )
+State State_ctor( StateFcn stateFcn )
 {
-	self->owner_ = 0;
-	self->stateFcn_ = stateFcn;		
+   State state = malloc(sizeof(struct State));
+   State_init(state, 0, stateFcn);
+   return state;
 }
 
-void State_dtor( State* self )
+void State_dtor( State self )
 {
+   free(self);
 }
 
 /// Initializer. Object takes ownership of load.
@@ -26,24 +28,6 @@ void State_init( State self, OWNER owner, StateFcn stateFcn )
 {
 	self->owner_ = owner;
 	self->stateFcn_ = stateFcn;
-}
-	
-void State_copyCtor( State self, State const other )
-{
-	self->owner_ = other->owner_;
-	self->stateFcn_ = other->stateFcn_;		
-}		
-
-/// Utility swap method.
-void State_swap( State self, State other )
-{
-	OWNER* tmp1 = self->owner_;
-	self->owner_  = other->owner_;
-	other->owner_ = tmp1;
-
-	StateFcn tmp2 = self->stateFcn_;
-	self->stateFcn_  = other->stateFcn_;
-	other->stateFcn_ = tmp2;
 }
 
 /// Conversion operator to StateFcn.
@@ -55,17 +39,19 @@ StateFcn State_stateFcn( State self )
 /// Equality operator.
 int State_isEqual( State self, State const rhs )
 {
-	return self->stateFcn_ == rhs->stateFcn_;
+	return self->stateFcn_ == rhs->stateFcn_ &&
+          self->owner_    == rhs->owner_;
 }
 
 /// Inequality operator.
 int State_isNotEqual( State self, State const rhs )
 {
-	return self->stateFcn_ != rhs->stateFcn_;
+   return self->stateFcn_ != rhs->stateFcn_ &&
+          self->owner_    != rhs->owner_;
 }
 
 /// Invoke transition in owner.
-State State_invoke( State self, Signal const e )
+State State_invoke( State self, Signal e )
 {
 	return self->stateFcn_( self->owner_, e );
 }
@@ -90,7 +76,7 @@ static void StateMachine_setTarget(StateMachine self, State const target);
 /// Invoke init event in given stateFcn and init/entry events in all
 /// possibly subsequent states.
 /// If init returns false, a self transition is invoked.
-static void StateMachine_init(StateMachine self, State stateFcn);
+static void StateMachine_init(StateMachine self, State state);
 
 /// Trace down to stateFcn that possibly handles the given signal.
 /// Releases the event.
@@ -114,28 +100,30 @@ static struct State handelState;
 #define INVOKE(state, event) State_invoke(StateMachine_##state(self), event)
 #define PITCHER() StateMachine_pitcher(self)
 #define TARGET() StateMachine_target(self)
-
+#define CURRENT() StateMachine_current(self)
+#define EQUAL(state1, state2) State_isEqual(state1, state2)
+#define NEQUAL(state1, state2) State_isNotEqual(state1, state2)
 
 //------------------------------------------------------------------------------
 
 void StateMachine_open(StateMachine   self,
-					   OWNER          owner,
-					   State const    initial,
-					   Signal         e)
+					        OWNER          owner,
+					        State const    initial,
+					        Signal         e)
 {
    SM_TRACE( "StateMachine_open" );
 
-   self->owner_   = owner;
-   self->pitcher_ = StateMachine_topState(self, SM_DUMMY);
-   self->current_ = StateMachine_topState(self, SM_DUMMY);
-   self->target_  = initial;
-   
    topState.stateFcn_    = StateMachine_topState;
-   topState.owner_       = self->owner_;
+   topState.owner_       = owner;
    handelState.stateFcn_ = StateMachine_handled;
-   handelState.owner_    = self->owner_;
+   handelState.owner_    = owner;
+   
+   self->owner_   = owner;
+   self->pitcher_ = &topState;
+   self->current_ = &handelState;
+   self->target_  = initial;
     
-   State target = StateMachine_target(self);
+   State target = TARGET();
    INVOKE(target, SM_ENTRY);
 
    StateMachine_init(self, target);
@@ -143,27 +131,26 @@ void StateMachine_open(StateMachine   self,
 
 //------------------------------------------------------------------------------
 
-int StateMachine_isInState(StateMachine self, State const* stateFcn)
+int StateMachine_isInState(StateMachine self, State const state)
 {
    SM_TRACE( "StateMachine_isInState" );
 
-   if (StateMachine_current(self) == stateFcn )
+   if ( CURRENT() == state )
    {
       return 2;
    }
 
    // and all states down to (not including) top.
 
-   State next     = State(StateMachine_current(self), INQUIRE);
-   State topState = StateMachine_topState(self->owner_);
+   State next = INVOKE( current, SM_INQUIRE );
 
-   while ( next != topState )
+   while ( NEQUAL( next, &topState ) )
    {
-      if ( next == stateFcn )
+      if ( EQUAL( next, state ) )
       {
          return 1;
       }
-      next = State_invoke( next, INQUIRE );
+      next = State_invoke( next, SM_INQUIRE );
    }
 
    return 0;
@@ -387,24 +374,23 @@ static State StateMachine_target(StateMachine self)
    return self->target_;
 }
 
-
 //------------------------------------------------------------------------------
 
-bool StateMachine_findPitcher( StateMachine self, Signal e )
+int StateMachine_findPitcher( StateMachine self, Signal e )
 {
    SM_TRACE( "StateMachine_findPitcher" );
 
-   pitcher( current() );
+   StateMachine_setPitcher( self, CURRENT() );
 
-   State< OWNER, T > next;
+   State next = INVOKE( pitcher, e );
 
-   while ( ( next = pitcher()( e ) ) != owner_->handled() && 
-           pitcher() != owner_->topState() )
+   while ( NEQUAL( next, &handelState ) && NEQUAL( PITCHER(), &topState ) )
    {
-      pitcher( next );
+      StateMachine_setPitcher( self, next );
+      next = INVOKE( pitcher, e );
    }
 
-   return ( pitcher() != owner_->topState() );
+   return ( NEQUAL( PITCHER(), &topState ) );
 }
 
 //------------------------------------------------------------------------------
@@ -412,20 +398,21 @@ bool StateMachine_findPitcher( StateMachine self, Signal e )
 void StateMachine_exitDownToPitcher(StateMachine self)
 {
    SM_TRACE( "StateMachine_exitDownToPitcher" );
-   assert( pitcher() != owner_->topState() && "exitDownToPitcher" );
+   
+   assert( NEQUAL( PITCHER(), &topState ) && "exitDownToPitcher" );
 
-   State< OWNER, T > next( current() );
+   State next = CURRENT();
 
-   while ( next != pitcher() )
+   while ( NEQUAL( next, PITCHER() ) )
    {
       assert( next );
 
-      State< OWNER, T > tmp = next( &exitEvent_ );
+      State tmp = State_invoke( next, SM_EXIT );
 
-      if ( tmp == owner_->handled() )
+      if ( EQUAL( tmp, &handledState ) )
       {
          // EXIT handled, elicit parent.
-         next = next( &inquireEvent_ );
+         next = State_invoke( next, SM_INQUIRE );
       }
       else
       {
@@ -453,12 +440,21 @@ void StateMachine_retraceEntryPath( StateMachine self, Path& trace )
 
 //------------------------------------------------------------------------------
 
-void StateMachine_init( StateMachine self, State stateFcn )
+void StateMachine_init( StateMachine self, State state )
 {
    SM_TRACE( "StateMachine_init" );
 
-   current( stateFcn );
+   StateMachine_setCurrent(self, state);
 
+   State next = state;
+
+   while ( next( &initEvent_ ) == owner_->handled() )
+   {
+      // INIT was handled so current has been modified (by initEvent_ call).
+      next = current();
+      next( &entryEvent_ );
+   }
+   
    State< OWNER, T > next( stateFcn );
 
    while ( next( &initEvent_ ) == owner_->handled() )

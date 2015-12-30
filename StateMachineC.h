@@ -41,30 +41,21 @@ struct State;
 /// User shall start numbering his signals with USER_START.
 typedef enum { SM_USER_START = 3 } StartSignal;
  
-typedef struct State* (*StateFcn)(OWNER, Signal);
+typedef struct State* (*StateFcn)( OWNER, Signal );
 
 struct State
 { 
 	StateFcn stateFcn_;
-    OWNER    owner_; // Cached, not owned
+   OWNER    owner_; // Cached, not owned
 };
 
 typedef struct State* State;
 
 /// Constructor
-void State_ctor( State self, StateFcn stateFcn );
+State State_ctor( StateFcn stateFcn );
 
 /// Initializer. Object takes ownership of load.
 void State_init( State self, OWNER owner, StateFcn stateFcn );
-	
-/// Copy constructor	
-void State_copyCtor( State self, State const other );
-
-/// Utility swap method.
-void State_swap( State self, State other );
-	
-/// Assignment operator.
-//State* State_assign( State self, State const other );
 
 /// Conversion operator to StateFcn.
 StateFcn State_stateFcn( State self );
@@ -76,7 +67,7 @@ int State_isEqual( State self, State const rhs );
 int State_isNotEqual( State self, State const rhs );
 
 /// Invoke transition in owner.
-State State_invoke( State self, Signal const e );
+State State_invoke( State self, Signal e );
 
 //==============================================================================
 
@@ -114,7 +105,7 @@ void StateMachine_open(StateMachine self,
 /// 2 if user is in given stateFcn,
 /// 1 if in sub stateFcn,
 /// 0 otherwise.
-int StateMachine_isInState(StateMachine self, State const stateFcn);
+int StateMachine_isInState(StateMachine self, State const state);
 
 /// Current stateFcn accessor.
 State StateMachine_current(StateMachine self);

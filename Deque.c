@@ -230,6 +230,22 @@ deque_clear(Deque d) {
 	return DEQUE_SUCCESS;
 }
 
+deque_result_t
+deque_clearn(Deque d, uint32_t count) {
+    DequeNode tmp;
+    assert(d != NULL);
+    while (d->head != NULL && count) {
+        tmp = d->head;
+        d->head = tmp->next;
+        deque_free_node(tmp);
+        count--;
+    }
+    d->head = NULL;
+    d->tail = NULL;
+    d->number_items = 0;
+    return DEQUE_SUCCESS;
+}
+
 /* Remove the rightmost element from the deque and return a reference to the
 * value pointed to by the deque node.  If there is no rightmost element
 * then NULL will be returned.
@@ -433,15 +449,17 @@ deque_reverse(Deque d) {
 	d->head = currNode;
 }
 
-/* Return TRUE if the deque contains the specified item and FALSE if not */
-uint8_t
+/* Return position starting @ 1 if the deque contains the specified item and 0 if not */
+uint32_t
 deque_contains(Deque d, void* item) {
+    uint32_t pos = 1;
 	DequeNode tmp = d->tail;
 	while (tmp != NULL) {
 		if ((d->compare_func)(tmp->value, item) == 0) {
-			return TRUE;
+			return pos;
 		}
 		tmp = tmp->next;
+        pos++;
 	}
-	return FALSE; /* item not found in deque */
+	return 0; /* item not found in deque */
 }

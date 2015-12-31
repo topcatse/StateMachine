@@ -56,6 +56,13 @@ State State_invoke( State self, Signal e )
 	return self->stateFcn_( self->owner_, e );
 }
 
+//------------------------------------------------------------------------------
+
+static int8_t state_comparator(const void * a, const void * b)
+{
+   return State_isEqual((State)a, (State)b) ? 0 : 1;
+}
+
 //==============================================================================
 
 /// Pitcher stateFcn accessor.
@@ -84,7 +91,7 @@ static int StateMachine_findPitcher(StateMachine self, Signal e);
 
 /// Invoke exit on all states from current stateFcn down to
 /// pitcher stateFcn.
-static void StateMachine_exitDownToPitcher(StateMachine self, );
+static void StateMachine_exitDownToPitcher(StateMachine self );
 
 /// Invoke entry event in given path.
 /// path: all states between pitcher and target..
@@ -93,11 +100,10 @@ static void StateMachine_exitDownToPitcher(StateMachine self, );
 static void StateMachine_retraceEntryPath(StateMachine self, Deque path);
 
 static struct State topState;
-static struct State handelState;
+static struct State handledState;
 
 //===========================================================================
 
-#define INVOKE(state, event) State_invoke(StateMachine_##state(self), event)
 #define PITCHER() StateMachine_pitcher(self)
 #define TARGET() StateMachine_target(self)
 #define CURRENT() StateMachine_current(self)
@@ -106,25 +112,34 @@ static struct State handelState;
 
 //------------------------------------------------------------------------------
 
+StateMachine StateMachine_ctor()
+{
+    return malloc( sizeof( struct StateMachine_t ) );
+}
+
+void StateMachine_dtor(StateMachine self)
+{
+    free( self );
+}
+
 void StateMachine_open(StateMachine   self,
-					        OWNER          owner,
-					        State const    initial,
-					        Signal         e)
+                       OWNER          owner,
+                       State const    initial)
 {
    SM_TRACE( "StateMachine_open" );
 
-   topState.stateFcn_    = StateMachine_topState;
-   topState.owner_       = owner;
-   handelState.stateFcn_ = StateMachine_handled;
-   handelState.owner_    = owner;
+   topState.stateFcn_     = StateMachine_topState;
+   topState.owner_        = owner;
+   handledState.stateFcn_ = StateMachine_handled;
+   handledState.owner_    = owner;
    
    self->owner_   = owner;
    self->pitcher_ = &topState;
-   self->current_ = &handelState;
+   self->current_ = &handledState;
    self->target_  = initial;
     
    State target = TARGET();
-   INVOKE(target, SM_ENTRY);
+   State_invoke( target, SM_ENTRY );
 
    StateMachine_init(self, target);
 }
@@ -142,7 +157,7 @@ int StateMachine_isInState(StateMachine self, State const state)
 
    // and all states down to (not including) top.
 
-   State next = INVOKE( current, SM_INQUIRE );
+   State next = State_invoke( CURRENT(), SM_INQUIRE );
 
    while ( NEQUAL( next, &topState ) )
    {
@@ -173,21 +188,20 @@ int StateMachine_dispatch(StateMachine self, Signal e)
     assert( e && "Bad event to StateMachine::dispatch" );
     
     // Used to elaborate internal transition.
-    State target = StateMachine_target(self);
-    State_invoke(target, StateMachine_topState(self, SM_DUMMY));
-    
-    if ( !StateMachine_findPitcher( self, e )
+    StateMachine_setTarget( self, &topState );
+   
+    if ( !StateMachine_findPitcher( self, e ) )
     {
         // Signal is not handled.
         SM_TRACE( "StateMachine no pitcher" );
-        return false;
+        return 0;
     }
     
     // ( h) Internal transition.
     // Side-effect: Call to findPitcher() above, which possibly,
     // sets a new target. If target is unchanged it is considered as an
     // internal transition so step out.
-    if (StateMachine_target(self) == StateMachine_topState)
+    if ( EQUAL( TARGET(), &topState ) )
     {
         SM_TRACE( "StateMachine handled case (h)" );
         return true;
@@ -196,109 +210,107 @@ int StateMachine_dispatch(StateMachine self, Signal e)
     StateMachine_exitDownToPitcher(self);
     
     // (a) Handle transition to self.
-    if (StateMachine_pitcher(self) == StateMachine_target(self) )
+    if ( EQUAL( PITCHER(), TARGET() ) )
     {
         SM_TRACE( "StateMachine handled case (a)" );
-        State_invoke(StateMachine_pitcher(self), EXIT);
-        State_invoke(StateMachine_target(self), ENTRY);
-        StateMachine_init(self, StateMachine_target(self) );
+        State_invoke( PITCHER(), SM_EXIT );
+        State_invoke( TARGET(), SM_ENTRY );
+        StateMachine_init( self, TARGET() );
         return true;
     }
     
     // (b) Handle pitcher == targets' parent.
-    State targetParent = INVOKE(target, INQUIRE);
-    if (PITCHER() == targetParent )
+    State targetParent = State_invoke( TARGET(), SM_INQUIRE);
+    if ( EQUAL( PITCHER(), targetParent ) )
     {
         SM_TRACE( "StateMachine handled case (b)" );
-        INVOKE(target, ENTRY);
-        StateMachine_init(self, TARGET());
+        State_invoke( TARGET(), SM_ENTRY );
+        StateMachine_init( self, TARGET() );
         return true;
     }
     
     // (c) Handle pitcher's parent == targets' parent.
-    State pitcherParent = INVOKE(pitcher, INQUIRE);
-    if ( pitcherParent == targetParent )
+    State pitcherParent = State_invoke( PITCHER(), SM_INQUIRE );
+    if ( EQUAL( pitcherParent, targetParent ) )
     {
         SM_TRACE( "StateMachine handled case (c)" );
-        INVOKE(pitcher, EXIT);
-        INVOKE(target, ENTRY);
-        StateMachine_init(self, TARGET());
+        State_invoke( PITCHER(), SM_EXIT );
+        State_invoke( TARGET(), SM_ENTRY );
+        StateMachine_init( self, TARGET() );
         return true;
     }
     
     // (d) Handle pitcher's parent == target.
-    if ( pitcherParent == target() )
+    if ( EQUAL( pitcherParent, TARGET() ) )
     {
         SM_TRACE( "StateMachine handled case (d)" );
-        INVOKE(pitcher, EXIT);
-        StateMachine_init(self, TARGET());
+        State_invoke( PITCHER(), SM_EXIT );
+        StateMachine_init( self, TARGET() );
         return true;
     }
     
-    // The target stateFcn hierarchy needs to be recorded.
+    // The target state hierarchy needs to be recorded.
     struct deque_t trace_instance;
     Deque trace = &trace_instance;
-    deque_init(trace, NULL);
+    deque_init( trace, state_comparator );
     
-    deque_append(trace, TARGET());
-    deque_append(trace, targetParent);
+    deque_append( trace, TARGET() );
+    deque_append( trace, targetParent );
     
     // (e) Handle pitcher == target's parent parent ... hierarchy.
-    State next = State_invoke(targetParent, INQUIRE);
-    while ( next != StateMachine_topState)
+    State next = State_invoke( targetParent, SM_INQUIRE );
+    while ( NEQUAL( next, &topState ) )
     {
-        if ( next == PITCHER() )
+        if ( EQUAL( next, PITCHER() ) )
         {
             SM_TRACE( "StateMachine handled case (e)" );
-            StateMachine_retraceEntryPath(self, trace);
-            StateMachine_init(self, TARGET());
+            StateMachine_retraceEntryPath( self, trace );
+            StateMachine_init( self, TARGET() );
             return true;
         }
-        deque_append(trace, next);
-        next = State_invoke(next, INQUIRE);
+        deque_append( trace, next );
+        next = State_invoke( next, SM_INQUIRE );
     }
-    deque_append(trace, StateMachine_topState);
+    deque_append( trace, &topState );
     
     // The remaining cases impose EXIT of pitcher.
-    INVOKE(pitcher, EXIT);
+    State_invoke( PITCHER(), SM_EXIT );
     
     // (f) Handle pitcher's parent == target's parent parent ... hierarchy.
-    typename Path::iterator pos;
-    if ( ( pos = find( trace.begin(),
-                      trace.end(),
-                      pitcherParent ) ) != trace.end() )
+    unsigned int pos = deque_contains( trace, pitcherParent );
+    if ( pos > 0 )
     {
         // Found Least Base Ancestor @ pos.
         // Erase it and its ancestors because ENTRY on these is not correct.
         SM_TRACE( "StateMachine handled case (f)" );
-        trace.erase( trace.begin(), ++pos );
-        retraceEntryPath( trace );
-        init( target() );
+        deque_clearn( trace, pos );
+        StateMachine_retraceEntryPath( self, trace );
+        StateMachine_init( self, TARGET() );
         return true;
     }
     
     // (g) Handle pitcher's parent parent ... hierarchy for each target.
-    bool search(true);
+    bool search = true;
     next = pitcherParent;
     while ( search )
     {
-        if ( ( pos = find( trace.begin(),
-                          trace.end(),
-                          next ) ) != trace.end() )
+        pos = deque_contains( trace, pitcherParent );
+        if ( pos > 0 )
         {
             // Found Least Base Ancestor @ pos.
             // Erase it and its ancestors because ENTRY on these
             // is not correct.
             SM_TRACE( "StateMachine handled case (g)" );
-            trace.erase( trace.begin(), ++pos );
-            retraceEntryPath( trace );
-            init( target() );
+            deque_clearn( trace, pos );
+            StateMachine_retraceEntryPath( self, trace );
+            StateMachine_init( self, TARGET() );
             return true;
         }
-        if ( next != owner_->topState() )
+        
+        if ( EQUAL( next, &topState ) )
         {
-            next( &exitEvent_ );
-            next = next( &inquireEvent_ );
+            State_invoke( next, SM_EXIT );
+            next = State_invoke( next, SM_INQUIRE );
         }
         else
         {
@@ -310,7 +322,7 @@ int StateMachine_dispatch(StateMachine self, Signal e)
     return false;
 }
 
-/// Call when there is a default initialization stateFcn.
+/// Call when there is a default initialization state.
 void StateMachine_initializer(StateMachine self, State const s)
 {
     StateMachine_setCurrent(self, s);
@@ -331,7 +343,7 @@ State StateMachine_topState(OWNER owner, Signal e)
 /// Shall be called when an event has been accepted.
 State StateMachine_handled(OWNER owner, Signal e)
 {
-    return &handelState;
+    return &handledState;
 }
 
 //------------------------------------------------------------------------------
@@ -382,15 +394,15 @@ int StateMachine_findPitcher( StateMachine self, Signal e )
 
    StateMachine_setPitcher( self, CURRENT() );
 
-   State next = INVOKE( pitcher, e );
+   State next = State_invoke( PITCHER(), e );
 
-   while ( NEQUAL( next, &handelState ) && NEQUAL( PITCHER(), &topState ) )
+   while ( NEQUAL( next, &handledState ) && NEQUAL( PITCHER(), &topState ) )
    {
       StateMachine_setPitcher( self, next );
-      next = INVOKE( pitcher, e );
+      next = State_invoke( PITCHER(), e );
    }
 
-   return ( NEQUAL( PITCHER(), &topState ) );
+   return NEQUAL( PITCHER(), &topState );
 }
 
 //------------------------------------------------------------------------------
@@ -424,18 +436,15 @@ void StateMachine_exitDownToPitcher(StateMachine self)
 
 //------------------------------------------------------------------------------
 
-void StateMachine_retraceEntryPath( StateMachine self, Path& trace )
+void StateMachine_retraceEntryPath( StateMachine self, Deque trace )
 {
-   SM_TRACE( "StateMachine_retraceEntryPath" );
+    SM_TRACE( "StateMachine_retraceEntryPath" );
 
-   typename Path::const_iterator iter;
-   typename Path::const_iterator end( trace.end() );
-
-   for ( iter = trace.begin(); iter != end; ++iter )
-   {
-       State< OWNER, T > sw = *iter;
-       sw( &entryEvent_ );
-   }
+    State state = 0;
+    while ( (state = deque_pop( trace )) )
+    {
+        State_invoke( state, SM_ENTRY );
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -448,21 +457,12 @@ void StateMachine_init( StateMachine self, State state )
 
    State next = state;
 
-   while ( next( &initEvent_ ) == owner_->handled() )
+   while ( State_invoke( next, SM_INIT ) == &handledState )
    {
       // INIT was handled so current has been modified (by initEvent_ call).
-      next = current();
-      next( &entryEvent_ );
-   }
-   
-   State< OWNER, T > next( stateFcn );
-
-   while ( next( &initEvent_ ) == owner_->handled() )
-   {
-      // INIT was handled so current has been modified (by initEvent_ call).
-      next = current();
-      next( &entryEvent_ );
+      next = CURRENT();
+      State_invoke( next, SM_ENTRY );
    }
 }
 
-#endif
+//==============================================================================

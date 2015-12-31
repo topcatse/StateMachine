@@ -31,6 +31,8 @@
 		651B380F1C1CA80900D04665 /* Deque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Deque.h; path = ../../Deque.h; sourceTree = "<group>"; };
 		651B38101C1CA80900D04665 /* StateMachine.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = StateMachine.c; path = ../../StateMachine.c; sourceTree = "<group>"; };
 		651B38111C1CA80900D04665 /* StateMachineC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachineC.h; path = ../../StateMachineC.h; sourceTree = "<group>"; };
+		651B38331C341A3D00D04665 /* StateMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachine.h; path = ../../StateMachine.h; sourceTree = "<group>"; };
+		651B38341C341A3D00D04665 /* StateMachine.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = StateMachine.inl; path = ../../StateMachine.inl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +49,8 @@
 		651B37FB1C1CA74C00D04665 = {
 			isa = PBXGroup;
 			children = (
+				651B38331C341A3D00D04665 /* StateMachine.h */,
+				651B38341C341A3D00D04665 /* StateMachine.inl */,
 				651B380E1C1CA80900D04665 /* Deque.c */,
 				651B380F1C1CA80900D04665 /* Deque.h */,
 				651B38101C1CA80900D04665 /* StateMachine.c */,

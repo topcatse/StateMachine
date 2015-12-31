@@ -76,6 +76,7 @@ void            deque_free(Deque d);
 deque_result_t  deque_append(Deque d, void* item);
 deque_result_t  deque_appendleft(Deque d, void* item);
 deque_result_t  deque_clear(Deque d);
+deque_result_t  deque_clearn(Deque d, uint32_t count);
 void*           deque_peek(Deque d);
 void*           deque_pop(Deque d);
 void*           deque_peekleft(Deque d);
@@ -86,5 +87,5 @@ void            deque_rotateleft(Deque d, uint32_t n);
 void            deque_rotateright(Deque d, uint32_t n);
 uint32_t        deque_count(Deque d);
 void            deque_reverse(Deque d);
-uint8_t         deque_contains(Deque d, void* item);
+uint32_t        deque_contains(Deque d, void* item);
 #endif

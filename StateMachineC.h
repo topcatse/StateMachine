@@ -91,19 +91,21 @@ struct StateMachine_t
 
 typedef struct StateMachine_t* StateMachine;
 
-/// Use to specify predefined stateFcn actions when a stateFcn is initialized, 
+/// Use to specify predefined state actions when a state is initialized, 
 /// is entered or leaves a stateFcn. INQUIRE is reserved for internal use.
 enum StandardSignals { SM_DUMMY = -2, SM_INQUIRE = -1, SM_INIT, SM_ENTRY, SM_EXIT };
+
+StateMachine StateMachine_ctor();
+void StateMachine_dtor(StateMachine self);
 
 /// Initialize and execute initial transition.
 void StateMachine_open(StateMachine self,
 					   OWNER        owner,
-					   State const  initial,
-					   Signal       e);
+					   State const  initial);
 
-/// Check if user is in given stateFcn.
-/// 2 if user is in given stateFcn,
-/// 1 if in sub stateFcn,
+/// Check if user is in given state.
+/// 2 if user is in given state,
+/// 1 if in sub state,
 /// 0 otherwise.
 int StateMachine_isInState(StateMachine self, State const state);
 
@@ -113,13 +115,13 @@ State StateMachine_current(StateMachine self);
 /// Dispatch event.
 int StateMachine_dispatch(StateMachine self, Signal e);
 
-/// Call when there is a default initialization stateFcn.
+/// Call when there is a default initialization state.
 void StateMachine_initializer(StateMachine self, State const s);
 
 /// Call when a transition shall occur.
 void StateMachine_transition(StateMachine self, State const s);
 
-/// To be returned when there is no parent stateFcn.
+/// To be returned when there is no parent state.
 State StateMachine_topState(OWNER owner, Signal e);
 
 /// Shall be called when an event has been accepted.

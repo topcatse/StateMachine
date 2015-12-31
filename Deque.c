@@ -154,7 +154,7 @@ deque_free(Deque d) {
 */
 deque_result_t
 deque_append(Deque d, void* item) {
-	deque_result_t retcode;
+	deque_result_t retcode = DEQUE_SUCCESS;
 	DequeNode newNode;
 	assert(d != NULL);
 

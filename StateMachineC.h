@@ -46,13 +46,13 @@ typedef struct State* (*StateFcn)( OWNER, Signal );
 struct State
 { 
 	StateFcn stateFcn_;
-   OWNER    owner_; // Cached, not owned
+    OWNER    owner_; // Cached, not owned
 };
 
 typedef struct State* State;
 
 /// Constructor
-State State_ctor( StateFcn stateFcn );
+State State_ctor( OWNER owner, StateFcn stateFcn );
 
 /// Initializer. Object takes ownership of load.
 void State_init( State self, OWNER owner, StateFcn stateFcn );
@@ -91,7 +91,7 @@ struct StateMachine_t
 
 typedef struct StateMachine_t* StateMachine;
 
-/// Use to specify predefined state actions when a state is initialized, 
+/// Use to specify predefined state actions when a state is initialized,
 /// is entered or leaves a stateFcn. INQUIRE is reserved for internal use.
 enum StandardSignals { SM_DUMMY = -2, SM_INQUIRE = -1, SM_INIT, SM_ENTRY, SM_EXIT };
 

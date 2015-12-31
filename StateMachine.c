@@ -11,10 +11,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
-State State_ctor( StateFcn stateFcn )
+State State_ctor( OWNER owner, StateFcn stateFcn )
 {
    State state = malloc(sizeof(struct State));
-   State_init(state, 0, stateFcn);
+   State_init(state, owner, stateFcn);
    return state;
 }
 
@@ -109,6 +109,7 @@ static struct State handledState;
 #define CURRENT() StateMachine_current(self)
 #define EQUAL(state1, state2) State_isEqual(state1, state2)
 #define NEQUAL(state1, state2) State_isNotEqual(state1, state2)
+#define APPEND(t, s) do{ if (deque_append(t, s)) return false; }while(0)
 
 //------------------------------------------------------------------------------
 
@@ -254,8 +255,8 @@ int StateMachine_dispatch(StateMachine self, Signal e)
     Deque trace = &trace_instance;
     deque_init( trace, state_comparator );
     
-    deque_append( trace, TARGET() );
-    deque_append( trace, targetParent );
+    APPEND( trace, TARGET() );
+    APPEND( trace, targetParent );
     
     // (e) Handle pitcher == target's parent parent ... hierarchy.
     State next = State_invoke( targetParent, SM_INQUIRE );
@@ -268,10 +269,10 @@ int StateMachine_dispatch(StateMachine self, Signal e)
             StateMachine_init( self, TARGET() );
             return true;
         }
-        deque_append( trace, next );
+        APPEND( trace, next );
         next = State_invoke( next, SM_INQUIRE );
     }
-    deque_append( trace, &topState );
+    APPEND( trace, &topState );
     
     // The remaining cases impose EXIT of pitcher.
     State_invoke( PITCHER(), SM_EXIT );
@@ -428,7 +429,7 @@ void StateMachine_exitDownToPitcher(StateMachine self)
       }
       else
       {
-         // EXIT not handled (tmp = parent).
+         // No EXIT in this state (tmp = parent).
          next = tmp;
       }
    }

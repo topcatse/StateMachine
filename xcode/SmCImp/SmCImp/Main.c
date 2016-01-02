@@ -1,4 +1,6 @@
 #include <stdio.h>
+
+#define SM_NTRACE 0
 #include "StateMachineC.h"
 
 #define HANDLED() StateMachine_handled(t->sm, SM_DUMMY)
@@ -18,16 +20,23 @@ typedef enum
     SM_D,
     SM_E,
     SM_F,
-    SM_G,
+    SM_G
 } TesterSignals;
 
 State Tester_s0(OWNER owner, Signal e)
 {
     Tester* t = owner;
     
-    switch (e) {
+    switch (e)
+    {
         case SM_INIT:
             StateMachine_initializer(t->sm, t->s1);
+            return HANDLED();
+        case SM_ENTRY:
+            printf("S0-ENTRY ");
+            return HANDLED();
+        case SM_EXIT:
+            printf("S0-EXIT ");
             return HANDLED();
         default:
             break;
@@ -40,20 +49,27 @@ State Tester_s1(OWNER owner, Signal e)
 {
     Tester* t = owner;
     
-    switch (e) {
+    switch (e)
+    {
+        case SM_ENTRY:
+            printf("S1-ENTRY ");
+            return HANDLED();
+        case SM_EXIT:
+            printf("S1-EXIT ");
+            return HANDLED();
         case SM_A:
-            printf("S1-A");
+            printf("S1-A ");
             StateMachine_transition(t->sm, t->s1);
             return HANDLED();
         case SM_D:
-            printf("S1-D");
+            printf("S1-D ");
             StateMachine_transition(t->sm, t->s0);
             return HANDLED();
         default:
             break;
     }
     
-    return t->s1;
+    return t->s0;
 }
 
 int main(int argc, char* argv[])

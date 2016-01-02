@@ -27,7 +27,7 @@
 #if ( defined( SM_NTRACE ) && SM_NTRACE == 1 )
 #   define SM_TRACE( X )
 #else
-#   define SM_TRACE( X ) LOG( DEBUG ) << X
+#   define SM_TRACE( X ) printf("%s\r\n", X);
 #endif /* SM_TRACE */
 
 //==============================================================================
@@ -61,10 +61,10 @@ void State_init( State self, OWNER owner, StateFcn stateFcn );
 StateFcn State_stateFcn( State self );
 
 /// Equality operator.
-int State_isEqual( State self, State const rhs );
+bool State_isEqual( State self, State const rhs );
 
 /// Inequality operator.
-int State_isNotEqual( State self, State const rhs );
+bool State_isNotEqual( State self, State const rhs );
 
 /// Invoke transition in owner.
 State State_invoke( State self, Signal e );
@@ -113,7 +113,7 @@ int StateMachine_isInState(StateMachine self, State const state);
 State StateMachine_current(StateMachine self);
 
 /// Dispatch event.
-int StateMachine_dispatch(StateMachine self, Signal e);
+bool StateMachine_dispatch(StateMachine self, Signal e);
 
 /// Call when there is a default initialization state.
 void StateMachine_initializer(StateMachine self, State const s);

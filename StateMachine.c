@@ -26,7 +26,7 @@ void State_dtor( State self )
 /// Initializer. Object takes ownership of load.
 void State_init( State self, OWNER owner, StateFcn stateFcn )
 {
-	self->owner_ = owner;
+	self->owner_    = owner;
 	self->stateFcn_ = stateFcn;
 }
 
@@ -37,17 +37,17 @@ StateFcn State_stateFcn( State self )
 }
 
 /// Equality operator.
-int State_isEqual( State self, State const rhs )
+bool State_isEqual( State self, State const rhs )
 {
 	return self->stateFcn_ == rhs->stateFcn_ &&
-          self->owner_    == rhs->owner_;
+           self->owner_    == rhs->owner_;
 }
 
 /// Inequality operator.
-int State_isNotEqual( State self, State const rhs )
+bool State_isNotEqual( State self, State const rhs )
 {
-   return self->stateFcn_ != rhs->stateFcn_ &&
-          self->owner_    != rhs->owner_;
+    return self->stateFcn_ != rhs->stateFcn_ ||
+           self->owner_    != rhs->owner_;
 }
 
 /// Invoke transition in owner.
@@ -87,7 +87,7 @@ static void StateMachine_init(StateMachine self, State state);
 
 /// Trace down to stateFcn that possibly handles the given signal.
 /// Releases the event.
-static int StateMachine_findPitcher(StateMachine self, Signal e);
+static bool StateMachine_findPitcher(StateMachine self, Signal e);
 
 /// Invoke exit on all states from current stateFcn down to
 /// pitcher stateFcn.
@@ -109,7 +109,7 @@ static struct State handledState;
 #define CURRENT() StateMachine_current(self)
 #define EQUAL(state1, state2) State_isEqual(state1, state2)
 #define NEQUAL(state1, state2) State_isNotEqual(state1, state2)
-#define APPEND(t, s) do{ if (deque_append(t, s)) return false; }while(0)
+#define APPEND(t, s) do{ result = deque_append(t, s); assert(result==DEQUE_SUCCESS); }while(0)
 
 //------------------------------------------------------------------------------
 
@@ -118,10 +118,14 @@ StateMachine StateMachine_ctor()
     return malloc( sizeof( struct StateMachine_t ) );
 }
 
+//------------------------------------------------------------------------------
+
 void StateMachine_dtor(StateMachine self)
 {
     free( self );
 }
+
+//------------------------------------------------------------------------------
 
 void StateMachine_open(StateMachine   self,
                        OWNER          owner,
@@ -182,7 +186,7 @@ State StateMachine_current(StateMachine self)
 
 //------------------------------------------------------------------------------
 
-int StateMachine_dispatch(StateMachine self, Signal e)
+bool StateMachine_dispatch(StateMachine self, Signal e)
 {
     SM_TRACE( "StateMachine_dispatch" );
     
@@ -195,7 +199,7 @@ int StateMachine_dispatch(StateMachine self, Signal e)
     {
         // Signal is not handled.
         SM_TRACE( "StateMachine no pitcher" );
-        return 0;
+        return false;
     }
     
     // ( h) Internal transition.
@@ -251,6 +255,7 @@ int StateMachine_dispatch(StateMachine self, Signal e)
     }
     
     // The target state hierarchy needs to be recorded.
+    deque_result_t result;
     struct deque_t trace_instance;
     Deque trace = &trace_instance;
     deque_init( trace, state_comparator );
@@ -389,7 +394,7 @@ static State StateMachine_target(StateMachine self)
 
 //------------------------------------------------------------------------------
 
-int StateMachine_findPitcher( StateMachine self, Signal e )
+bool StateMachine_findPitcher( StateMachine self, Signal e )
 {
    SM_TRACE( "StateMachine_findPitcher" );
 

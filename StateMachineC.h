@@ -27,6 +27,7 @@
 #if ( defined( SM_NTRACE ) && SM_NTRACE == 1 )
 #   define SM_TRACE( X )
 #else
+#   include <stdio.h>
 #   define SM_TRACE( X ) printf("%s\r\n", X);
 #endif /* SM_TRACE */
 

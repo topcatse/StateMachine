@@ -76,7 +76,7 @@ void            deque_free(Deque d);
 deque_result_t  deque_append(Deque d, void* item);
 deque_result_t  deque_appendleft(Deque d, void* item);
 deque_result_t  deque_clear(Deque d);
-deque_result_t  deque_clearn(Deque d, uint32_t count);
+void            deque_popnleft(Deque d, uint32_t count);
 void*           deque_peek(Deque d);
 void*           deque_pop(Deque d);
 void*           deque_peekleft(Deque d);

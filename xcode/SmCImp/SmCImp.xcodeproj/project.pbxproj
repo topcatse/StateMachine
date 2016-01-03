@@ -33,6 +33,7 @@
 		651B38111C1CA80900D04665 /* StateMachineC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachineC.h; path = ../../StateMachineC.h; sourceTree = "<group>"; };
 		651B38331C341A3D00D04665 /* StateMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachine.h; path = ../../StateMachine.h; sourceTree = "<group>"; };
 		651B38341C341A3D00D04665 /* StateMachine.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = StateMachine.inl; path = ../../StateMachine.inl; sourceTree = "<group>"; };
+		651B38351C39CE8F00D04665 /* Mem.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Mem.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +50,7 @@
 		651B37FB1C1CA74C00D04665 = {
 			isa = PBXGroup;
 			children = (
+				651B38351C39CE8F00D04665 /* Mem.txt */,
 				651B38331C341A3D00D04665 /* StateMachine.h */,
 				651B38341C341A3D00D04665 /* StateMachine.inl */,
 				651B380E1C1CA80900D04665 /* Deque.c */,
@@ -220,7 +222,7 @@
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
-					"SM_NTRACE=0",
+					"SM_NTRACE=1",
 					"$(inherited)",
 				);
 				OTHER_CFLAGS = "";

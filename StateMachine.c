@@ -109,7 +109,7 @@ static struct State handledState;
 #define CURRENT() StateMachine_current(self)
 #define EQUAL(state1, state2) State_isEqual(state1, state2)
 #define NEQUAL(state1, state2) State_isNotEqual(state1, state2)
-#define APPEND(t, s) do{ result = deque_append(t, s); assert(result==DEQUE_SUCCESS); }while(0)
+#define APPEND(t, s) do{ result = deque_appendleft(t, s); assert(result==DEQUE_SUCCESS); }while(0)
 
 //------------------------------------------------------------------------------
 
@@ -289,7 +289,7 @@ bool StateMachine_dispatch(StateMachine self, Signal e)
         // Found Least Base Ancestor @ pos.
         // Erase it and its ancestors because ENTRY on these is not correct.
         SM_TRACE( "StateMachine handled case (f)" );
-        deque_clearn( trace, pos );
+        deque_popnleft( trace, pos );
         StateMachine_retraceEntryPath( self, trace );
         StateMachine_init( self, TARGET() );
         return true;
@@ -300,20 +300,20 @@ bool StateMachine_dispatch(StateMachine self, Signal e)
     next = pitcherParent;
     while ( search )
     {
-        pos = deque_contains( trace, pitcherParent );
+        pos = deque_contains( trace, next );
         if ( pos > 0 )
         {
             // Found Least Base Ancestor @ pos.
             // Erase it and its ancestors because ENTRY on these
             // is not correct.
             SM_TRACE( "StateMachine handled case (g)" );
-            deque_clearn( trace, pos );
+            deque_popnleft( trace, pos );
             StateMachine_retraceEntryPath( self, trace );
             StateMachine_init( self, TARGET() );
             return true;
         }
         
-        if ( EQUAL( next, &topState ) )
+        if ( NEQUAL( next, &topState ) )
         {
             State_invoke( next, SM_EXIT );
             next = State_invoke( next, SM_INQUIRE );
@@ -328,11 +328,15 @@ bool StateMachine_dispatch(StateMachine self, Signal e)
     return false;
 }
 
+//------------------------------------------------------------------------------
+
 /// Call when there is a default initialization state.
 void StateMachine_initializer(StateMachine self, State const s)
 {
     StateMachine_setCurrent(self, s);
 }
+
+//------------------------------------------------------------------------------
 
 /// Call when a transition shall occur.
 void StateMachine_transition(StateMachine self, State const s)
@@ -340,11 +344,15 @@ void StateMachine_transition(StateMachine self, State const s)
     StateMachine_setTarget(self, s);
 }
 
+//------------------------------------------------------------------------------
+
 /// To be returned when there is no parent stateFcn.
 State StateMachine_topState(OWNER owner, Signal e)
 {
     return &topState;
 }
+
+//------------------------------------------------------------------------------
 
 /// Shall be called when an event has been accepted.
 State StateMachine_handled(OWNER owner, Signal e)
@@ -447,7 +455,7 @@ void StateMachine_retraceEntryPath( StateMachine self, Deque trace )
     SM_TRACE( "StateMachine_retraceEntryPath" );
 
     State state = 0;
-    while ( (state = deque_pop( trace )) )
+    while ( (state = deque_popleft( trace )) )
     {
         State_invoke( state, SM_ENTRY );
     }

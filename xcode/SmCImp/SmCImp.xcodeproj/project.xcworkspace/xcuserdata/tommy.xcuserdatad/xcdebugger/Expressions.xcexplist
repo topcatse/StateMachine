@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "StateMachine_dispatch:StateMachine.c">
+      </ContextState>
+      <ContextState
+         contextName = "State_isNotEqual:StateMachine.c">
+      </ContextState>
+      <ContextState
+         contextName = "deque_append:Deque.c">
+      </ContextState>
+      <ContextState
+         contextName = "StateMachine_findPitcherTarget:StateMachine.c">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

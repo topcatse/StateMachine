@@ -114,7 +114,11 @@ State Tester_s11(OWNER owner, Signal e)
             StateMachine_transition(t->sm, t->s211);
             return HANDLED();
         case SM_H:
-            if (t->foo) printf("S11-H ");
+            if (t->foo)
+            {
+                printf("S11-H ");
+                t->foo = 0;
+            }
             return HANDLED();
         default:
             break;
@@ -175,7 +179,7 @@ State Tester_s21(OWNER owner, Signal e)
             StateMachine_transition(t->sm, t->s211);
             return HANDLED();
         case SM_H:
-            if (t->foo)
+            if (!t->foo)
             {
                 printf("S21-H ");
                 t->foo = 1;

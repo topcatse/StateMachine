@@ -68,6 +68,16 @@ deque_init(Deque d, deque_comparater_t compare_func) {
 	d->head = NULL;
 	d->tail = NULL;
 	d->number_items = 0;
+    
+#ifdef DEQUE_STATIC
+    int i;
+    for (i = 0; i < sizeof(d->nodes)/sizeof(d->nodes[0]); i++) {
+        d->nodes[i].value  = NULL;
+        d->nodes[i].next   = NULL;
+        d->nodes[i].prev   = NULL;
+        d->nodes[i].in_use = false;
+    }    
+#endif /* DEQUE_STATIC */
 }
 
 
@@ -75,9 +85,10 @@ deque_init(Deque d, deque_comparater_t compare_func) {
 static struct deque_node_t *
 deque_alloc_node(Deque d) {
 	struct deque_node_t * node;
-	int i;
+	int i = 0;
 	/* find the first unused node */
-	while ((node = &d->nodes[i++])->in_use);
+	while ((node = &d->nodes[i++])->in_use)
+        ;
 	if (node != NULL)
 		node->in_use = true;
 	return node;
@@ -221,7 +232,7 @@ deque_clear(Deque d) {
 	assert(d != NULL);
 	while (d->head != NULL) {
 		tmp = d->head;
-		d->head = tmp->next;
+		d->head = tmp->prev;
 		deque_free_node(tmp);
 	}
 	d->head = NULL;
@@ -230,20 +241,12 @@ deque_clear(Deque d) {
 	return DEQUE_SUCCESS;
 }
 
-deque_result_t
-deque_clearn(Deque d, uint32_t count) {
-    DequeNode tmp;
-    assert(d != NULL);
-    while (d->head != NULL && count) {
-        tmp = d->head;
-        d->head = tmp->next;
-        deque_free_node(tmp);
+void
+deque_popnleft(Deque d, uint32_t count) {
+    while (count) {
+        deque_popleft(d);
         count--;
     }
-    d->head = NULL;
-    d->tail = NULL;
-    d->number_items = 0;
-    return DEQUE_SUCCESS;
 }
 
 /* Remove the rightmost element from the deque and return a reference to the

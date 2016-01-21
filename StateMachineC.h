@@ -9,10 +9,6 @@
 #define BASE_STATE_MACHINE_H_
 //==============================================================================
 
-#include "Deque.h"
-
-//==============================================================================
-
 // This section should be defined elsewhere.
 
 /// Define this if tracing SHALL occur.
@@ -30,6 +26,8 @@
 #   include <stdio.h>
 #   define SM_TRACE( X ) printf("%s\r\n", X);
 #endif /* SM_TRACE */
+
+#define STATEMACHINE_MAX_DEPTH 20
 
 //==============================================================================
 
@@ -72,6 +70,37 @@ State State_invoke( State self, Signal e );
 
 //==============================================================================
 
+struct DequeNode_t
+{
+	State				state_;
+	struct DequeNode_t* next_;
+	struct DequeNode_t* prev_;
+	bool				used_;
+};
+
+typedef struct DequeNode_t* DequeNode;
+
+struct Deque_t
+{
+	DequeNode*			head_;
+	DequeNode*			tail_;
+	int					nbrOfItems_;
+	struct DequeNode_t	nodes_[STATEMACHINE_MAX_DEPTH];
+};
+
+typedef struct Deque_t* Deque;
+
+/// Deque initialization.
+void Deque_init(Deque self);
+
+/// Push a state to the deque.
+void Deque_push(Deque self, State state);
+
+/// Pop a state from the deque.
+State Deque_push(Deque self);
+
+//==============================================================================
+
 /**
  * A Hierarchical State Machine framework.
  */
@@ -96,7 +125,10 @@ typedef struct StateMachine_t* StateMachine;
 /// is entered or leaves a state. INQUIRE is reserved for internal use.
 enum StandardSignals { SM_DUMMY = -2, SM_INQUIRE = -1, SM_INIT, SM_ENTRY, SM_EXIT };
 
+/// State machine constructor.
 StateMachine StateMachine_ctor();
+
+/// State machine destructor.
 void StateMachine_dtor(StateMachine self);
 
 /// Initialize and execute initial transition.

@@ -102,7 +102,103 @@ static void StateMachine_retraceEntryPath(StateMachine self, Deque path);
 static struct State topState;
 static struct State handledState;
 
-//===========================================================================
+//==============================================================================
+
+static DequeNode Deque_getFreeNode(Deque self)
+{
+	DequeNode node;
+	int i = 0;
+	for (i = 0; i != STATEMACHINE_MAX_DEPTH; i++)
+	{
+		node = &self->nodes_[i];
+		if (!node->used_)
+			break;
+	}
+
+	if (!node) return NULL;
+
+	node->used_ = true;
+
+	return node;
+}
+
+//------------------------------------------------------------------------------
+
+void Deque_init(Deque self)
+{
+	assert(dq && "Deque instance");
+
+	self->head_	    = NULL;
+	self->tail_	    = NULL;
+	self->nbrOfItems_ = 0;
+
+	int i;
+	for (i = 0; i < sizeof(self->nodes_) / sizeof(self->nodes_[0]); i++)
+	{
+		self->nodes_[i].state_ = NULL;
+		self->nodes_[i].next_  = NULL;
+		self->nodes_[i].prev_  = NULL;
+		self->nodes_[i].used_  = false;
+	}
+}
+
+//------------------------------------------------------------------------------
+
+bool Deque_push(Deque self, State state)
+{
+	assert(self);
+
+	DequeNode node;
+
+	node = Deque_getFreeNode(d);
+	if (node == NULL)
+	{
+		return false;
+	}
+
+	node->next_ = self->tail_;
+	node->prev_ = NULL;
+	node->state_ = state;
+
+	if (self->tail_)
+	{
+		self->tail_->prev_ = node;
+	}
+
+	if (!self->head_)
+	{
+		self->head_ = self->tail_;
+	}
+
+	self->tail_ = node;
+	self->nbrOfItems_++;
+
+	return true;
+}
+
+//------------------------------------------------------------------------------
+
+State Deque_push(Deque self)
+{
+	DequeNode prevTail;
+	void* value;
+	if (d->tail == NULL)
+	{
+		return NULL;
+	}
+
+		prevTail = d->tail;
+		d->tail = prevTail->next;
+		if (d->tail != NULL) {
+			d->tail->prev = NULL;
+		}
+		d->number_items--;
+		value = prevTail->value;
+		deque_free_node(prevTail);
+		return value;
+}
+
+//==============================================================================
 
 #define PITCHER() StateMachine_pitcher(self)
 #define TARGET() StateMachine_target(self)
@@ -115,7 +211,8 @@ static struct State handledState;
 
 StateMachine StateMachine_ctor()
 {
-    return malloc( sizeof( struct StateMachine_t ) );
+	StateMachine sm = malloc(sizeof(struct StateMachine_t));
+	return sm;
 }
 
 //------------------------------------------------------------------------------

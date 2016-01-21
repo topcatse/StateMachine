@@ -73,27 +73,27 @@ State State_invoke( State self, Signal e );
 //==============================================================================
 
 /**
- * A Hierarchical StateFcn Machine framework.
+ * A Hierarchical State Machine framework.
  */
 struct StateMachine_t
 {
-    /// The current stateFcn.
+    /// The current state.
     State current_;
 
-    /// Pitcher stateFcn during a transition.
+    /// Pitcher state during a transition.
     State pitcher_;
     
-    /// Target stateFcn during a transition.
+    /// Target state during a transition.
     State target_;
 
-    /// The stateFcn machine owner.
+    /// The state machine owner.
     OWNER owner_;
 };
 
 typedef struct StateMachine_t* StateMachine;
 
 /// Use to specify predefined state actions when a state is initialized,
-/// is entered or leaves a stateFcn. INQUIRE is reserved for internal use.
+/// is entered or leaves a state. INQUIRE is reserved for internal use.
 enum StandardSignals { SM_DUMMY = -2, SM_INQUIRE = -1, SM_INIT, SM_ENTRY, SM_EXIT };
 
 StateMachine StateMachine_ctor();
@@ -110,7 +110,7 @@ void StateMachine_open(StateMachine self,
 /// 0 otherwise.
 int StateMachine_isInState(StateMachine self, State const state);
 
-/// Current stateFcn accessor.
+/// Current state accessor.
 State StateMachine_current(StateMachine self);
 
 /// Dispatch event.

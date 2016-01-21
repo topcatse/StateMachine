@@ -65,32 +65,32 @@ static int8_t state_comparator(const void * a, const void * b)
 
 //==============================================================================
 
-/// Pitcher stateFcn accessor.
+/// Pitcher state accessor.
 static State StateMachine_pitcher(StateMachine self);
 
-/// Target stateFcn accessor.
+/// Target state accessor.
 static State StateMachine_target(StateMachine self);
 
-/// Current stateFcn mutator.
+/// Current state mutator.
 static void StateMachine_setCurrent(StateMachine self, State const current);
 
-/// Pitcher stateFcn mutator.
+/// Pitcher state mutator.
 static void StateMachine_setPitcher(StateMachine self, State const pitcher);
 
-/// Target stateFcn mutator.
+/// Target state mutator.
 static void StateMachine_setTarget(StateMachine self, State const target);
 
-/// Invoke init event in given stateFcn and init/entry events in all
+/// Invoke init event in given state and init/entry events in all
 /// possibly subsequent states.
 /// If init returns false, a self transition is invoked.
 static void StateMachine_init(StateMachine self, State state);
 
-/// Trace down to stateFcn that possibly handles the given signal.
+/// Trace down to state that possibly handles the given signal.
 /// Releases the event.
 static bool StateMachine_findPitcher(StateMachine self, Signal e);
 
-/// Invoke exit on all states from current stateFcn down to
-/// pitcher stateFcn.
+/// Invoke exit on all states from current state down to
+/// pitcher state.
 static void StateMachine_exitDownToPitcher(StateMachine self );
 
 /// Invoke entry event in given path.
@@ -346,7 +346,7 @@ void StateMachine_transition(StateMachine self, State const s)
 
 //------------------------------------------------------------------------------
 
-/// To be returned when there is no parent stateFcn.
+/// To be returned when there is no parent state.
 State StateMachine_topState(OWNER owner, Signal e)
 {
     return &topState;
@@ -364,7 +364,7 @@ State StateMachine_handled(OWNER owner, Signal e)
 
 static void StateMachine_setCurrent(StateMachine self, State const current)
 {
-   SM_TRACE( "StateMachine_setCurrent( StateFcn current )" );
+   SM_TRACE( "StateMachine_setCurrent( State current )" );
    self->current_ = current;
 }
 

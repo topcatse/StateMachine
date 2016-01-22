@@ -9,6 +9,8 @@
 #define BASE_STATE_MACHINE_H_
 //==============================================================================
 
+#include <stdbool.h>
+
 // This section should be defined elsewhere.
 
 /// Define this if tracing SHALL occur.
@@ -67,37 +69,6 @@ bool State_isNotEqual( State self, State const rhs );
 
 /// Invoke transition in owner.
 State State_invoke( State self, Signal e );
-
-//==============================================================================
-
-struct DequeNode_t
-{
-	State				state_;
-	struct DequeNode_t* next_;
-	struct DequeNode_t* prev_;
-	bool				used_;
-};
-
-typedef struct DequeNode_t* DequeNode;
-
-struct Deque_t
-{
-	DequeNode*			head_;
-	DequeNode*			tail_;
-	int					nbrOfItems_;
-	struct DequeNode_t	nodes_[STATEMACHINE_MAX_DEPTH];
-};
-
-typedef struct Deque_t* Deque;
-
-/// Deque initialization.
-void Deque_init(Deque self);
-
-/// Push a state to the deque.
-void Deque_push(Deque self, State state);
-
-/// Pop a state from the deque.
-State Deque_push(Deque self);
 
 //==============================================================================
 

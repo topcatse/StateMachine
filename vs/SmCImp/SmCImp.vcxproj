@@ -144,12 +144,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Deque.c" />
     <ClCompile Include="..\..\StateMachine.c" />
     <ClCompile Include="Main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Deque.h" />
     <ClInclude Include="..\..\StateMachineC.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

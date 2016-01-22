@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <signal.h>
 #include "StateMachineC.h"
 
 #define HANDLED() StateMachine_handled(t->sm, SM_DUMMY)
@@ -24,7 +25,8 @@ typedef enum
     SM_E,
     SM_F,
     SM_G,
-    SM_H
+    SM_H,
+	SM_X
 } TesterSignals;
 
 State Tester_s0(OWNER owner, Signal e)
@@ -47,6 +49,10 @@ State Tester_s0(OWNER owner, Signal e)
             printf("S0-E ");
             StateMachine_transition(t->sm, t->s211);
             return HANDLED();
+		case SM_X:
+			printf("S0-X ");
+			exit(0);
+			return HANDLED();
         default:
             break;
     }
@@ -230,9 +236,20 @@ char* stateAsTxt(State s)
     return "Nada";
 }
 
+Tester tester;
+
+void interuptHandler(int sig)
+{
+	if (sig == SIGINT)
+	{
+		StateMachine_dispatch(tester.sm, SM_X);;
+	}
+}
+
 int main(int argc, char* argv[])
 {
-	Tester tester;
+	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
+		signal(SIGINT, interuptHandler);
 
 	tester.s0   = State_ctor(&tester, Tester_s0);
 	tester.s1   = State_ctor(&tester, Tester_s1);
@@ -251,11 +268,6 @@ int main(int argc, char* argv[])
         
         char c = getc(stdin);
         getc(stdin); // discard '\n'
-        
-        if (c == '\033')
-        {
-            return 0;
-        }
         
         StateMachine_dispatch(tester.sm, c - 'a' + SM_USER_START);
     }

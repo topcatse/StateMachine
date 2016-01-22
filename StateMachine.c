@@ -56,11 +56,164 @@ State State_invoke( State self, Signal e )
 	return self->stateFcn_( self->owner_, e );
 }
 
+//==============================================================================
+
+struct DequeNode_t
+{
+	State				state_;
+	struct DequeNode_t* next_;
+	struct DequeNode_t* prev_;
+	bool				used_;
+};
+
+typedef struct DequeNode_t* DequeNode;
+
+struct Deque_t
+{
+	DequeNode			head_;
+	DequeNode			tail_;
+	int					nbrOfItems_;
+	struct DequeNode_t	nodes_[STATEMACHINE_MAX_DEPTH];
+};
+
+typedef struct Deque_t* Deque;
+
 //------------------------------------------------------------------------------
 
-static int8_t state_comparator(const void * a, const void * b)
+static DequeNode Deque_acquireNode(Deque self)
 {
-   return State_isEqual((State)a, (State)b) ? 0 : 1;
+	DequeNode node;
+	int i = 0;
+	for (i = 0; i != STATEMACHINE_MAX_DEPTH; i++)
+	{
+		node = &self->nodes_[i];
+		if (!node->used_)
+			break;
+	}
+
+	if (!node) return NULL;
+
+	node->used_ = true;
+
+	return node;
+}
+
+//------------------------------------------------------------------------------
+
+static void Deque_releaseNode(Deque self, DequeNode node)
+{
+	node->used_ = false;
+}
+
+//------------------------------------------------------------------------------
+
+static void Deque_init(Deque self)
+{
+	assert(self && "Deque instance");
+
+	self->head_ = NULL;
+	self->tail_ = NULL;
+	self->nbrOfItems_ = 0;
+
+	int i;
+	for (i = 0; i < sizeof(self->nodes_) / sizeof(self->nodes_[0]); i++)
+	{
+		self->nodes_[i].state_ = NULL;
+		self->nodes_[i].next_ = NULL;
+		self->nodes_[i].prev_ = NULL;
+		self->nodes_[i].used_ = false;
+	}
+}
+
+//------------------------------------------------------------------------------
+
+static bool Deque_push(Deque self, State state)
+{
+	assert(self);
+
+	DequeNode node;
+
+	node = Deque_acquireNode(self);
+	if (!node)
+	{
+		return false;
+	}
+
+	node->next_ = self->tail_;
+	node->prev_ = NULL;
+	node->state_ = state;
+
+	if (self->tail_)
+	{
+		self->tail_->prev_ = node;
+	}
+
+	if (!self->head_)
+	{
+		self->head_ = self->tail_;
+	}
+
+	self->tail_ = node;
+	self->nbrOfItems_++;
+
+	return true;
+}
+
+//------------------------------------------------------------------------------
+
+static State Deque_pop(Deque self)
+{
+	assert(self);
+
+	State state;
+	if (!self->tail_)
+	{
+		return NULL;
+	}
+
+	DequeNode prevTail;
+	prevTail = self->tail_;
+	self->tail_ = prevTail->next_;
+	if (self->tail_)
+	{
+		self->tail_->prev_ = NULL;
+	}
+
+	self->nbrOfItems_--;
+	state = prevTail->state_;
+	Deque_releaseNode(self, prevTail);
+
+	return state;
+}
+
+//------------------------------------------------------------------------------
+
+static void Deque_popn(Deque self, int count)
+{
+	while (count)
+	{
+		Deque_pop(self);
+		count--;
+	}
+}
+
+//------------------------------------------------------------------------------
+
+static int Deque_contains(Deque self, State const state)
+{
+	int pos = 1;
+	DequeNode tmp = self->tail_;
+	while (tmp)
+	{
+		if (1)//State_isEqual(tmp->state_, state))
+		{
+			return pos;
+		}
+		tmp = tmp->next_;
+		pos++;
+	}
+
+	return 0;
 }
 
 //==============================================================================
@@ -104,108 +257,12 @@ static struct State handledState;
 
 //==============================================================================
 
-static DequeNode Deque_getFreeNode(Deque self)
-{
-	DequeNode node;
-	int i = 0;
-	for (i = 0; i != STATEMACHINE_MAX_DEPTH; i++)
-	{
-		node = &self->nodes_[i];
-		if (!node->used_)
-			break;
-	}
-
-	if (!node) return NULL;
-
-	node->used_ = true;
-
-	return node;
-}
-
-//------------------------------------------------------------------------------
-
-void Deque_init(Deque self)
-{
-	assert(dq && "Deque instance");
-
-	self->head_	    = NULL;
-	self->tail_	    = NULL;
-	self->nbrOfItems_ = 0;
-
-	int i;
-	for (i = 0; i < sizeof(self->nodes_) / sizeof(self->nodes_[0]); i++)
-	{
-		self->nodes_[i].state_ = NULL;
-		self->nodes_[i].next_  = NULL;
-		self->nodes_[i].prev_  = NULL;
-		self->nodes_[i].used_  = false;
-	}
-}
-
-//------------------------------------------------------------------------------
-
-bool Deque_push(Deque self, State state)
-{
-	assert(self);
-
-	DequeNode node;
-
-	node = Deque_getFreeNode(d);
-	if (node == NULL)
-	{
-		return false;
-	}
-
-	node->next_ = self->tail_;
-	node->prev_ = NULL;
-	node->state_ = state;
-
-	if (self->tail_)
-	{
-		self->tail_->prev_ = node;
-	}
-
-	if (!self->head_)
-	{
-		self->head_ = self->tail_;
-	}
-
-	self->tail_ = node;
-	self->nbrOfItems_++;
-
-	return true;
-}
-
-//------------------------------------------------------------------------------
-
-State Deque_push(Deque self)
-{
-	DequeNode prevTail;
-	void* value;
-	if (d->tail == NULL)
-	{
-		return NULL;
-	}
-
-		prevTail = d->tail;
-		d->tail = prevTail->next;
-		if (d->tail != NULL) {
-			d->tail->prev = NULL;
-		}
-		d->number_items--;
-		value = prevTail->value;
-		deque_free_node(prevTail);
-		return value;
-}
-
-//==============================================================================
-
 #define PITCHER() StateMachine_pitcher(self)
 #define TARGET() StateMachine_target(self)
 #define CURRENT() StateMachine_current(self)
 #define EQUAL(state1, state2) State_isEqual(state1, state2)
 #define NEQUAL(state1, state2) State_isNotEqual(state1, state2)
-#define APPEND(t, s) do{ result = deque_appendleft(t, s); assert(result==DEQUE_SUCCESS); }while(0)
+#define PUSH(t, s) do{ result = Deque_push(t, s); assert(result); }while(0)
 
 //------------------------------------------------------------------------------
 
@@ -352,13 +409,13 @@ bool StateMachine_dispatch(StateMachine self, Signal e)
     }
     
     // The target state hierarchy needs to be recorded.
-    deque_result_t result;
-    struct deque_t trace_instance;
+    bool result;
+    struct Deque_t trace_instance;
     Deque trace = &trace_instance;
-    deque_init( trace, state_comparator );
+    Deque_init( trace );
     
-    APPEND( trace, TARGET() );
-    APPEND( trace, targetParent );
+    PUSH( trace, TARGET() );
+    PUSH( trace, targetParent );
     
     // (e) Handle pitcher == target's parent parent ... hierarchy.
     State next = State_invoke( targetParent, SM_INQUIRE );
@@ -371,22 +428,22 @@ bool StateMachine_dispatch(StateMachine self, Signal e)
             StateMachine_init( self, TARGET() );
             return true;
         }
-        APPEND( trace, next );
+        PUSH( trace, next );
         next = State_invoke( next, SM_INQUIRE );
     }
-    APPEND( trace, &topState );
+    PUSH( trace, &topState );
     
     // The remaining cases impose EXIT of pitcher.
     State_invoke( PITCHER(), SM_EXIT );
     
     // (f) Handle pitcher's parent == target's parent parent ... hierarchy.
-    unsigned int pos = deque_contains( trace, pitcherParent );
+    unsigned int pos = Deque_contains( trace, pitcherParent );
     if ( pos > 0 )
     {
         // Found Least Base Ancestor @ pos.
         // Erase it and its ancestors because ENTRY on these is not correct.
         SM_TRACE( "StateMachine handled case (f)" );
-        deque_popnleft( trace, pos );
+        Deque_popn( trace, pos );
         StateMachine_retraceEntryPath( self, trace );
         StateMachine_init( self, TARGET() );
         return true;
@@ -397,14 +454,14 @@ bool StateMachine_dispatch(StateMachine self, Signal e)
     next = pitcherParent;
     while ( search )
     {
-        pos = deque_contains( trace, next );
+        pos = Deque_contains( trace, next );
         if ( pos > 0 )
         {
             // Found Least Base Ancestor @ pos.
             // Erase it and its ancestors because ENTRY on these
             // is not correct.
             SM_TRACE( "StateMachine handled case (g)" );
-            deque_popnleft( trace, pos );
+			Deque_popn( trace, pos );
             StateMachine_retraceEntryPath( self, trace );
             StateMachine_init( self, TARGET() );
             return true;
@@ -552,7 +609,7 @@ void StateMachine_retraceEntryPath( StateMachine self, Deque trace )
     SM_TRACE( "StateMachine_retraceEntryPath" );
 
     State state = 0;
-    while ( (state = deque_popleft( trace )) )
+    while ( (state = Deque_pop( trace )) )
     {
         State_invoke( state, SM_ENTRY );
     }

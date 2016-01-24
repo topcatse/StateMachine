@@ -9,9 +9,7 @@
 #define BASE_STATE_MACHINE_H_
 //==============================================================================
 
-#include "Deque.h"
-
-//==============================================================================
+#include <stdbool.h>
 
 // This section should be defined elsewhere.
 
@@ -30,6 +28,8 @@
 #   include <stdio.h>
 #   define SM_TRACE( X ) printf("%s\r\n", X);
 #endif /* SM_TRACE */
+
+#define STATEMACHINE_MAX_DEPTH 20
 
 //==============================================================================
 
@@ -96,7 +96,10 @@ typedef struct StateMachine_t* StateMachine;
 /// is entered or leaves a state. INQUIRE is reserved for internal use.
 enum StandardSignals { SM_DUMMY = -2, SM_INQUIRE = -1, SM_INIT, SM_ENTRY, SM_EXIT };
 
+/// State machine constructor.
 StateMachine StateMachine_ctor();
+
+/// State machine destructor.
 void StateMachine_dtor(StateMachine self);
 
 /// Initialize and execute initial transition.

@@ -82,7 +82,7 @@ typedef struct Deque_t* Deque;
 
 static DequeNode Deque_acquireNode(Deque self)
 {
-	DequeNode node;
+	DequeNode node = NULL;
 	int i = 0;
 	for (i = 0; i != STATEMACHINE_MAX_DEPTH; i++)
 	{
@@ -205,7 +205,7 @@ static int Deque_contains(Deque self, State const state)
 	DequeNode tmp = self->tail_;
 	while (tmp)
 	{
-		if (1)//State_isEqual(tmp->state_, state))
+		if (State_isEqual(tmp->state_, state))
 		{
 			return pos;
 		}

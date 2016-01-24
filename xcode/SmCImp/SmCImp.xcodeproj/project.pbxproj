@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		651B38081C1CA74D00D04665 /* Main.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B38071C1CA74D00D04665 /* Main.c */; };
-		651B38121C1CA80900D04665 /* Deque.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B380E1C1CA80900D04665 /* Deque.c */; };
 		651B38131C1CA80900D04665 /* StateMachine.c in Sources */ = {isa = PBXBuildFile; fileRef = 651B38101C1CA80900D04665 /* StateMachine.c */; };
 /* End PBXBuildFile section */
 
@@ -27,13 +26,10 @@
 /* Begin PBXFileReference section */
 		651B38041C1CA74D00D04665 /* SmCImp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SmCImp; sourceTree = BUILT_PRODUCTS_DIR; };
 		651B38071C1CA74D00D04665 /* Main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Main.c; sourceTree = "<group>"; };
-		651B380E1C1CA80900D04665 /* Deque.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = Deque.c; path = ../../Deque.c; sourceTree = "<group>"; };
-		651B380F1C1CA80900D04665 /* Deque.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Deque.h; path = ../../Deque.h; sourceTree = "<group>"; };
 		651B38101C1CA80900D04665 /* StateMachine.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = StateMachine.c; path = ../../StateMachine.c; sourceTree = "<group>"; };
 		651B38111C1CA80900D04665 /* StateMachineC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachineC.h; path = ../../StateMachineC.h; sourceTree = "<group>"; };
 		651B38331C341A3D00D04665 /* StateMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StateMachine.h; path = ../../StateMachine.h; sourceTree = "<group>"; };
 		651B38341C341A3D00D04665 /* StateMachine.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = StateMachine.inl; path = ../../StateMachine.inl; sourceTree = "<group>"; };
-		651B38351C39CE8F00D04665 /* Mem.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Mem.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,11 +46,8 @@
 		651B37FB1C1CA74C00D04665 = {
 			isa = PBXGroup;
 			children = (
-				651B38351C39CE8F00D04665 /* Mem.txt */,
 				651B38331C341A3D00D04665 /* StateMachine.h */,
 				651B38341C341A3D00D04665 /* StateMachine.inl */,
-				651B380E1C1CA80900D04665 /* Deque.c */,
-				651B380F1C1CA80900D04665 /* Deque.h */,
 				651B38101C1CA80900D04665 /* StateMachine.c */,
 				651B38111C1CA80900D04665 /* StateMachineC.h */,
 				651B38061C1CA74D00D04665 /* SmCImp */,
@@ -135,7 +128,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				651B38131C1CA80900D04665 /* StateMachine.c in Sources */,
-				651B38121C1CA80900D04665 /* Deque.c in Sources */,
 				651B38081C1CA74D00D04665 /* Main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
